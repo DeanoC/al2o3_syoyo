@@ -42,6 +42,7 @@ set( Tests
 		test_objloader_c.cpp
 		)
 set( TestDeps
+		utils_simple_logmanager
 		al2o3_catch2 )
 ADD_LIB_TESTS(${LibName} "${Interface}" "${Tests}" "${TestDeps}")
 

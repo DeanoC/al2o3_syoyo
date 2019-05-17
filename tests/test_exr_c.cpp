@@ -1,22 +1,23 @@
-#include "core/core.h"
-#include "os/filesystem.h"
-#include "vfile/vfile.hpp"
-#include "catch/catch.hpp"
+#include "al2o3_platform/platform.h"
+#include "al2o3_os/filesystem.h"
+#include "al2o3_vfile/vfile.hpp"
+#include "al2o3_catch2/catch2.hpp"
 
-#include "syoyo/tiny_exr.h"
+#include "al2o3_syoyo/tiny_exr.h"
 
 // path to https://github.com/openexr/openexr-images
 static const char *gBasePath = "test_data/exr/";
 
 #define SET_PATH()   char existCurDir[1024]; \
-Os_GetCurrentDir(existCurDir, sizeof(existCurDir)); \
-char path[2048]; \
-strcpy(path, existCurDir); \
-strcat(path, gBasePath); \
-Os_SetCurrentDir(path)
+	Os_GetCurrentDir(existCurDir, sizeof(existCurDir)); \
+	char path[2048]; \
+	strcpy(path, existCurDir); \
+	strcat(path, gBasePath); \
+	Os_SetCurrentDir(path)
 
 #define RESTORE_PATH()   Os_SetCurrentDir(existCurDir)
 
+/*
 TEST_CASE("asakusa", "[tinyexr]") {
   SET_PATH();
 
@@ -33,7 +34,7 @@ TEST_CASE("asakusa", "[tinyexr]") {
 
   RESTORE_PATH();
 }
-
+*/
 static void TestExr(char const *filename, bool tiled = false) {
   TinyExr_EXRVersion exr_version;
   LOGINFOF("Loading %s", filename);
