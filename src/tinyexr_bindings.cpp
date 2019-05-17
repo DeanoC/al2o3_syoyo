@@ -154,10 +154,24 @@ AL2O3_EXTERN_C int TinyExr_ParseEXRHeader(TinyExr_EXRHeader *header,
     VFile_MemFile_t* memFile = (VFile_MemFile_t*) VFile_GetTypeSpecificData(handle);
     buf = ((uint8_t*) memFile->memory) + memFile->offset;
   } else {
-    buf = (uint8_t * )malloc(filesize);
-    size_t ret;
-    ret = VFile_Read(handle, buf, filesize);
-    ASSERT(ret <= filesize);
+		size_t curPos = VFile_Tell(handle);
+		EXRVersion tmpVersion;
+  	EXRHeader tmpHeader;
+		size_t ret;
+		ret = VFile_Read(handle, &tmpVersion, kEXRVersionSize);
+		ASSERT(ret == kEXRVersionSize);
+		ret = VFile_Read(handle, &tmpHeader, sizeof(EXRHeader));
+		ASSERT(ret == sizeof(EXRHeader));
+		VFile_Seek(handle, curPos, VFile_SD_Begin);
+		if(tmpHeader.multipart) {
+			// TODO this could be read optimized but for now rely on OS cache
+			buf = (uint8_t * )malloc(filesize);
+			ret = VFile_Read(handle, buf, filesize);
+		} else {
+			buf = (uint8_t *) malloc(tmpHeader.header_len + kEXRVersionSize + sizeof(EXRHeader));
+			ret = VFile_Read(handle, buf, tmpHeader.header_len + kEXRVersionSize + sizeof(EXRHeader));
+		}
+		ASSERT(ret <= filesize);
   }
 
   int rete = ParseEXRHeaderFromMemory(header, version, buf, filesize);
