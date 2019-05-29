@@ -2,6 +2,7 @@
 #include "al2o3_syoyo/tiny_exr.h"
 #include "al2o3_vfile/memory.h"
 #include "tinyexr.hpp"
+#include "al2o3_memory/memory.h"
 
 AL2O3_EXTERN_C void TinyExr_InitEXRHeader(TinyExr_EXRHeader *exr_header) {
   if (exr_header == NULL) {
@@ -32,25 +33,25 @@ AL2O3_EXTERN_C int TinyExr_FreeEXRHeader(TinyExr_EXRHeader *exr_header) {
   }
 
   if (exr_header->channels) {
-    free(exr_header->channels);
+    MEMORY_FREE(exr_header->channels);
   }
 
   if (exr_header->pixel_types) {
-    free(exr_header->pixel_types);
+    MEMORY_FREE(exr_header->pixel_types);
   }
 
   if (exr_header->requested_pixel_types) {
-    free(exr_header->requested_pixel_types);
+		MEMORY_FREE(exr_header->requested_pixel_types);
   }
 
   for (int i = 0; i < exr_header->num_custom_attributes; i++) {
     if (exr_header->custom_attributes[i].value) {
-      free(exr_header->custom_attributes[i].value);
+			MEMORY_FREE(exr_header->custom_attributes[i].value);
     }
   }
 
   if (exr_header->custom_attributes) {
-    free(exr_header->custom_attributes);
+		MEMORY_FREE(exr_header->custom_attributes);
   }
 
   return TINYEXR_SUCCESS;
@@ -63,26 +64,26 @@ AL2O3_EXTERN_C int TinyExr_FreeEXRImage(TinyExr_EXRImage *exr_image) {
 
   for (int i = 0; i < exr_image->num_channels; i++) {
     if (exr_image->images && exr_image->images[i]) {
-      free(exr_image->images[i]);
+			MEMORY_FREE(exr_image->images[i]);
     }
   }
 
   if (exr_image->images) {
-    free(exr_image->images);
+		MEMORY_FREE(exr_image->images);
   }
 
   if (exr_image->tiles) {
     for (int tid = 0; tid < exr_image->num_tiles; tid++) {
       for (int i = 0; i < exr_image->num_channels; i++) {
         if (exr_image->tiles[tid].images && exr_image->tiles[tid].images[i]) {
-          free(exr_image->tiles[tid].images[i]);
+					MEMORY_FREE(exr_image->tiles[tid].images[i]);
         }
       }
       if (exr_image->tiles[tid].images) {
-        free(exr_image->tiles[tid].images);
+				MEMORY_FREE(exr_image->tiles[tid].images);
       }
     }
-    free(exr_image->tiles);
+		MEMORY_FREE(exr_image->tiles);
   }
 
   return TINYEXR_SUCCESS;
@@ -113,7 +114,7 @@ AL2O3_EXTERN_C int TinyExr_ParseEXRVersion(TinyExr_EXRVersion *version, VFile_Ha
     VFile_MemFile_t* memFile = (VFile_MemFile_t*) VFile_GetTypeSpecificData(handle);
     buf = ((uint8_t*) memFile->memory) + memFile->offset;
   } else {
-    buf = (uint8_t * )malloc(kEXRVersionSize);
+    buf = (uint8_t * )MEMORY_MALLOC(kEXRVersionSize);
     size_t ret;
     ret = VFile_Read(handle, buf, kEXRVersionSize);
     ASSERT(ret == kEXRVersionSize);
@@ -122,7 +123,7 @@ AL2O3_EXTERN_C int TinyExr_ParseEXRVersion(TinyExr_EXRVersion *version, VFile_Ha
   int rete = ParseEXRVersionFromMemory(version, buf, kEXRVersionSize);
 
   if(VFile_GetType(handle) != VFile_Type_Memory) {
-    free(buf);
+		MEMORY_FREE(buf);
   }
   return rete;
 }
@@ -165,10 +166,10 @@ AL2O3_EXTERN_C int TinyExr_ParseEXRHeader(TinyExr_EXRHeader *header,
 		VFile_Seek(handle, curPos, VFile_SD_Begin);
 		if(tmpHeader.multipart) {
 			// TODO this could be read optimized but for now rely on OS cache
-			buf = (uint8_t * )malloc(filesize);
+			buf = (uint8_t * )MEMORY_MALLOC(filesize);
 			ret = VFile_Read(handle, buf, filesize);
 		} else {
-			buf = (uint8_t *) malloc(tmpHeader.header_len + kEXRVersionSize + sizeof(EXRHeader));
+			buf = (uint8_t *) MEMORY_MALLOC(tmpHeader.header_len + kEXRVersionSize + sizeof(EXRHeader));
 			ret = VFile_Read(handle, buf, tmpHeader.header_len + kEXRVersionSize + sizeof(EXRHeader));
 		}
 		ASSERT(ret <= filesize);
@@ -177,7 +178,7 @@ AL2O3_EXTERN_C int TinyExr_ParseEXRHeader(TinyExr_EXRHeader *header,
   int rete = ParseEXRHeaderFromMemory(header, version, buf, filesize);
 
   if(VFile_GetType(handle) != VFile_Type_Memory) {
-    free(buf);
+		MEMORY_FREE(buf);
   }
   return rete;
 }
@@ -210,7 +211,7 @@ AL2O3_EXTERN_C int TinyExr_ParseEXRMultipartHeader(TinyExr_EXRHeader ***headers,
     VFile_MemFile_t* memFile = (VFile_MemFile_t*) VFile_GetTypeSpecificData(handle);
     buf = ((uint8_t*) memFile->memory) + memFile->offset;
   } else {
-    buf = (uint8_t * )malloc(filesize);
+    buf = (uint8_t * )MEMORY_MALLOC(filesize);
     size_t ret;
     ret = VFile_Read(handle, buf, filesize);
     ASSERT(ret <= filesize);
@@ -219,7 +220,7 @@ AL2O3_EXTERN_C int TinyExr_ParseEXRMultipartHeader(TinyExr_EXRHeader ***headers,
   int rete = ParseEXRMultipartHeaderFromMemory(headers, num_headers, version, buf, filesize);
 
   if(VFile_GetType(handle) != VFile_Type_Memory) {
-    free(buf);
+		MEMORY_FREE(buf);
   }
   return rete;
 
@@ -252,14 +253,14 @@ AL2O3_EXTERN_C int TinyExr_LoadEXRImage(TinyExr_EXRImage *exr_image,
     VFile_MemFile_t* memFile = (VFile_MemFile_t*) VFile_GetTypeSpecificData(handle);
     buf = ((uint8_t*) memFile->memory) + memFile->offset;
   } else {
-    buf = (uint8_t * )malloc(filesize);
+    buf = (uint8_t * )MEMORY_MALLOC(filesize);
     size_t ret;
     ret = VFile_Read(handle, buf, filesize);
     ASSERT(ret <= filesize);
   }
 
   int rete = tinyexr::LoadEXRImageFromMemory(exr_image, exr_header, buf, filesize);
-  free(buf);
+	MEMORY_FREE(buf);
   return rete;
 }
 
@@ -285,7 +286,7 @@ AL2O3_EXTERN_C int TinyExr_LoadEXRMultipartImage(
     VFile_MemFile_t* memFile = (VFile_MemFile_t*) VFile_GetTypeSpecificData(handle);
     buf = ((uint8_t*) memFile->memory) + memFile->offset;
   } else {
-    buf = (uint8_t * )malloc(filesize);
+    buf = (uint8_t * )MEMORY_MALLOC(filesize);
     size_t ret;
     ret = VFile_Read(handle, buf, filesize);
     ASSERT(ret <= filesize);
@@ -328,7 +329,7 @@ AL2O3_EXTERN_C int TinyExr_SaveEXRImage(
   if ((mem_size > 0) && mem) {
     written_size = VFile_Write(handle, mem, mem_size);
   }
-  free(mem);
+	MEMORY_FREE(mem);
 
   VFile_Close(handle);
 
