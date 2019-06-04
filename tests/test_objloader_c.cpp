@@ -1,4 +1,5 @@
 #include "al2o3_platform/platform.h"
+#include "al2o3_memory/memory.h"
 #include "al2o3_os/filesystem.h"
 #include "al2o3_vfile/vfile.hpp"
 #include "al2o3_catch2/catch2.hpp"
@@ -36,27 +37,27 @@ static void PrintInfo(tinyobj_attrib_t const& attrib,
   std::cout << "# of materials : " << num_materials << std::endl;
 
   for (size_t v = 0; v < attrib.num_vertices / 3; v++) {
-    printf("  v[%ld] = (%f, %f, %f)\n", v,
+    printf("  v[%zd] = (%f, %f, %f)\n", v,
            static_cast<const double>(attrib.vertices[3 * v + 0]),
            static_cast<const double>(attrib.vertices[3 * v + 1]),
            static_cast<const double>(attrib.vertices[3 * v + 2]));
   }
 
   for (size_t v = 0; v < attrib.num_normals / 3; v++) {
-    printf("  n[%ld] = (%f, %f, %f)\n", v,
+    printf("  n[%zd] = (%f, %f, %f)\n", v,
            static_cast<const double>(attrib.normals[3 * v + 0]),
            static_cast<const double>(attrib.normals[3 * v + 1]),
            static_cast<const double>(attrib.normals[3 * v + 2]));
   }
 
   for (size_t v = 0; v < attrib.num_texcoords / 2; v++) {
-    printf("  uv[%ld] = (%f, %f)\n", v,
+    printf("  uv[%zd] = (%f, %f)\n", v,
            static_cast<const double>(attrib.texcoords[2 * v + 0]),
            static_cast<const double>(attrib.texcoords[2 * v + 1]));
   }
 
   for (size_t i = 0; i < num_shapes; i++) {
-    printf("shape[%ld].name = %s\n", i, shapes[i].name);
+    printf("shape[%zd].name = %s\n", i, shapes[i].name);
 /*    printf("Size of shape[%ld].indices: %ld\n", i,
            shapes[i].mesh.indices.size());
 
@@ -141,7 +142,7 @@ static void PrintInfo(tinyobj_attrib_t const& attrib,
   }
 
   for (size_t i = 0; i < num_materials; i++) {
-    printf("material[%ld].name = %s\n", i, materials[i].name);
+    printf("material[%zd].name = %s\n", i, materials[i].name);
     printf("  material.Ka = (%f, %f ,%f)\n",
            static_cast<const double>(materials[i].ambient[0]),
            static_cast<const double>(materials[i].ambient[1]),
@@ -195,31 +196,30 @@ static bool TestLoadObj(const char *filename,
                         tinyobj_material_t *& materials,
                         size_t& num_materials,
                         bool triangulate = true) {
-		SET_PATH();
+	SET_PATH();
 
-//  std::cout << "Loading " << filename << std::endl;
-
-  VFile::ScopedFile file = VFile::File::FromFile(path, Os_FM_Read);
+	LOGINFOF("Loading %s", filename);
+  VFile::ScopedFile file = VFile::File::FromFile(filename, Os_FM_Read);
   if(!file) {
-    Os_SetCurrentDir(existCurDir);
-    return false;
+		RESTORE_PATH();
+		return false;
   }
   uint64_t data_len = file->Size();
-  char *data = (char *) malloc(data_len);
+  char *data = (char *) MEMORY_MALLOC(data_len);
   file->Read(data, data_len);
 
   unsigned int flags = TINYOBJ_FLAG_TRIANGULATE;
   int ret = tinyobj_parse_obj(&attrib, &shapes, &num_shapes, &materials,
                               &num_materials, data, data_len, flags);
   if (ret != TINYOBJ_SUCCESS) {
-    printf("Failed to load/parse .obj.\n");
-    free(data);
+    LOGWARNING("Failed to load/parse .obj");
+    MEMORY_FREE(data);
 		RESTORE_PATH();
     return false;
   }
   // don't pollute test logs except when fixin
   //PrintInfo(attrib, shapes, num_shapes, materials, num_materials, triangulate);
-  free(data);
+  MEMORY_FREE(data);
 
   RESTORE_PATH();
 
@@ -261,7 +261,7 @@ TEST_CASE("pbr", "[Loader]") {
   tinyobj_material_t *materials = NULL;
   size_t num_materials;
 
-  bool ret = TestLoadObj("catmark_torus_creases0.obj",
+  bool ret = TestLoadObj("cube.obj",
                          attrib,
                          shapes,
                          num_shapes,
