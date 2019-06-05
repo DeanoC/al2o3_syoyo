@@ -1,24 +1,15 @@
 #include "al2o3_platform/platform.h"
+#include "al2o3_memory/memory.h"
 #include "al2o3_vfile/vfile.h"
 #include "al2o3_vfile/utils.h"
 #include "al2o3_syoyo/tiny_objloader.h"
 #include <stdio.h> // for sscanf
 
-#if defined(TINYOBJ_MALLOC) && defined(TINYOBJ_REALLOC) && defined(TINYOBJ_CALLOC) && defined(TINYOBJ_FREE)
-/* ok */
-#elif !defined(TINYOBJ_MALLOC) && !defined(TINYOBJ_REALLOC) && !defined(TINYOBJ_CALLOC) && !defined(TINYOBJ_FREE)
-/* ok */
-#else
-#error "Must define all or none of TINYOBJ_MALLOC, TINYOBJ_REALLOC, TINYOBJ_CALLOC and TINYOBJ_FREE."
-#endif
-
-#ifndef TINYOBJ_MALLOC
 #include <stdlib.h>
-#define TINYOBJ_MALLOC malloc
-#define TINYOBJ_REALLOC realloc
-#define TINYOBJ_CALLOC calloc
-#define TINYOBJ_FREE free
-#endif
+#define TINYOBJ_MALLOC(x) MEMORY_MALLOC(x)
+#define TINYOBJ_REALLOC(x, y) MEMORY_REALLOC(x,y)
+#define TINYOBJ_CALLOC(x, y) MEMORY_CALLOC(x,y)
+#define TINYOBJ_FREE(x) MEMORY_FREE(x)
 
 #define TINYOBJ_MAX_FACES_PER_F_LINE (16)
 
@@ -1000,7 +991,7 @@ static int parseLine(Command *command, const char *p, size_t p_len,
         command->f[3 * n + 0] = i0;
         command->f[3 * n + 1] = i1;
         command->f[3 * n + 2] = i2;
-
+					
         command->f_num_verts[n] = 3;
         n++;
       }
