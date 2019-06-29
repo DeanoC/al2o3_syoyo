@@ -33,7 +33,7 @@ set(Deps
 		al2o3_memory
 		al2o3_vfile
 		al2o3_tinystl
-		al2o3_miniz
+		data_bufferutils
 		)
 ADD_LIB(${LibName} "${Interface}" "${Src}" "${Deps}")
 

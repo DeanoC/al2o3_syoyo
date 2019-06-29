@@ -2,7 +2,7 @@
 #include "al2o3_vfile/vfile.h"
 #include "al2o3_syoyo/tiny_exr.hpp"
 #include "tinyexr.hpp"
-#include "al2o3_miniz/miniz.h"
+#include "data_bufferutils/miniz.h"
 
 #include <algorithm>
 #include <stdio.h>
