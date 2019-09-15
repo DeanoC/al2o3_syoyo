@@ -629,7 +629,7 @@ static int tinyobj_parse_and_index_mtl_file(tinyobj_material_t **materials_out,
   // try absolute load
   fileHandle = VFile_FromFile(filename, Os_FM_Read);
   if (!fileHandle) {
-    LOGWARNINGF("TINYOBJ: Error reading file '%s'", filename);
+		LOGWARNING("TINYOBJ: Error reading file '%s'", filename);
     return TINYOBJ_ERROR_FILE_OPERATION;
   }
 
@@ -1204,7 +1204,7 @@ int tinyobj_parse_obj(tinyobj_attrib_t *attrib, tinyobj_shape_t **shapes,
 
     if (ret != TINYOBJ_SUCCESS) {
       /* warning. */
-      LOGWARNINGF("TINYOBJ: Failed to parse material file '%s': %d\n", filename, ret);
+			LOGWARNING("TINYOBJ: Failed to parse material file '%s': %d\n", filename, ret);
     }
 
     TINYOBJ_FREE(filename);

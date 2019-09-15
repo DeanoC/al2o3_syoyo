@@ -37,7 +37,7 @@ TEST_CASE("asakusa", "[tinyexr]") {
 */
 static void TestExr(char const *filename, bool tiled = false) {
   TinyExr_EXRVersion exr_version;
-  LOGINFOF("Loading %s", filename);
+	LOGINFO("Loading %s", filename);
   VFile::ScopedFile file = VFile::File::FromFile(filename, Os_FM_ReadBinary);
   REQUIRE(file);
 

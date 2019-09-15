@@ -3823,7 +3823,7 @@ static int DecodeChunk(EXRImage *exr_image, const EXRHeader *exr_header,
   int data_height = exr_header->data_window[3] - exr_header->data_window[1] + 1;
 
   if ((data_width < 0) || (data_height < 0)) {
-    LOGERRORF("Invalid data width or data height: %i $i", data_width, data_height);
+		LOGERROR("Invalid data width or data height: %i $i", data_width, data_height);
     return TINYEXR_ERROR_INVALID_DATA;
   }
 
@@ -3831,8 +3831,8 @@ static int DecodeChunk(EXRImage *exr_image, const EXRHeader *exr_header,
   {
     const int threshold = 1024 * 8192;  // heuristics
     if ((data_width > threshold) || (data_height > threshold)) {
-      LOGERRORF("data_with or data_height too large. data_width: %i,""data_height = %i",
-                data_width, data_height);
+			LOGERROR("data_with or data_height too large. data_width: %i,""data_height = %i",
+							 data_width, data_height);
       return TINYEXR_ERROR_INVALID_DATA;
     }
   }
@@ -3854,12 +3854,12 @@ static int DecodeChunk(EXRImage *exr_image, const EXRHeader *exr_header,
   if (exr_header->tiled) {
     // value check
     if (exr_header->tile_size_x < 0) {
-      LOGERRORF("Invalid tile size x : %i", exr_header->tile_size_x);
+			LOGERROR("Invalid tile size x : %i", exr_header->tile_size_x);
       return TINYEXR_ERROR_INVALID_HEADER;
     }
 
     if (exr_header->tile_size_y < 0) {
-      LOGERRORF("Invalid tile size y : %i", exr_header->tile_size_y);
+			LOGERROR("Invalid tile size y : %i", exr_header->tile_size_y);
       return TINYEXR_ERROR_INVALID_HEADER;
     }
 
@@ -3942,8 +3942,8 @@ static int DecodeChunk(EXRImage *exr_image, const EXRHeader *exr_header,
     size_t total_data_len =
         size_t(data_width) * size_t(data_height) * size_t(num_channels);
     if ((total_data_len == 0) || (total_data_len >= 0x4000000000)) {
-      LOGERRORF("Image data size is zero or too large: width = %i, height = %i, channels = %i",
-                data_width, data_height, num_channels);
+			LOGERROR("Image data size is zero or too large: width = %i, height = %i, channels = %i",
+							 data_width, data_height, num_channels);
       return TINYEXR_ERROR_INVALID_DATA;
     }
 

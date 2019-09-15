@@ -198,7 +198,7 @@ static bool TestLoadObj(const char *filename,
                         bool triangulate = true) {
 	SET_PATH();
 
-	LOGINFOF("Loading %s", filename);
+	LOGINFO("Loading %s", filename);
   VFile::ScopedFile file = VFile::File::FromFile(filename, Os_FM_Read);
   if(!file) {
 		RESTORE_PATH();
