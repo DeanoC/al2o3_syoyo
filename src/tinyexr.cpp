@@ -3394,7 +3394,7 @@ static unsigned char **AllocateImage(int num_channels,
                                      int data_width, int data_height) {
   unsigned char **images =
       reinterpret_cast<unsigned char **>(static_cast<float **>(
-          malloc(sizeof(float *) * static_cast<size_t>(num_channels))));
+          MEMORY_MALLOC(sizeof(float *) * static_cast<size_t>(num_channels))));
 
   for (size_t c = 0; c < static_cast<size_t>(num_channels); c++) {
     size_t data_len =
@@ -3406,10 +3406,10 @@ static unsigned char **AllocateImage(int num_channels,
       if (requested_pixel_types[c] == TINYEXR_PIXELTYPE_HALF) {
         images[c] =
             reinterpret_cast<unsigned char *>(static_cast<unsigned short *>(
-                malloc(sizeof(unsigned short) * data_len)));
+                MEMORY_MALLOC(sizeof(unsigned short) * data_len)));
       } else if (requested_pixel_types[c] == TINYEXR_PIXELTYPE_FLOAT) {
         images[c] = reinterpret_cast<unsigned char *>(
-            static_cast<float *>(malloc(sizeof(float) * data_len)));
+            static_cast<float *>(MEMORY_MALLOC(sizeof(float) * data_len)));
       } else {
         assert(0);
       }
@@ -3417,12 +3417,12 @@ static unsigned char **AllocateImage(int num_channels,
       // pixel_data_size += sizeof(float);
       // channel_offset += sizeof(float);
       images[c] = reinterpret_cast<unsigned char *>(
-          static_cast<float *>(malloc(sizeof(float) * data_len)));
+          static_cast<float *>(MEMORY_MALLOC(sizeof(float) * data_len)));
     } else if (channels[c].pixel_type == TINYEXR_PIXELTYPE_UINT) {
       // pixel_data_size += sizeof(unsigned int);
       // channel_offset += sizeof(unsigned int);
       images[c] = reinterpret_cast<unsigned char *>(
-          static_cast<unsigned int *>(malloc(sizeof(unsigned int) * data_len)));
+          static_cast<unsigned int *>(MEMORY_MALLOC(sizeof(unsigned int) * data_len)));
     } else {
       assert(0);
     }
@@ -3660,7 +3660,7 @@ static int ParseEXRHeader(HeaderInfo *info, bool *empty_header,
         attrib.name[255] = '\0';
         attrib.type[255] = '\0';
         attrib.size = static_cast<int>(data.size());
-        attrib.value = static_cast<unsigned char *>(malloc(data.size()));
+        attrib.value = static_cast<unsigned char *>(MEMORY_MALLOC(data.size()));
         memcpy(reinterpret_cast<char *>(attrib.value), &data.at(0),
                data.size());
         info->attributes.push_back(attrib);
@@ -3746,7 +3746,7 @@ static void ConvertHeader(EXRHeader *exr_header, const HeaderInfo& info) {
 
   exr_header->num_channels = static_cast<int>(info.channels.size());
 
-  exr_header->channels = static_cast<EXRChannelInfo *>(malloc(
+  exr_header->channels = static_cast<EXRChannelInfo *>(MEMORY_MALLOC(
       sizeof(EXRChannelInfo) * static_cast<size_t>(exr_header->num_channels)));
   for (size_t c = 0; c < static_cast<size_t>(exr_header->num_channels); c++) {
 #ifdef _MSC_VER
@@ -3764,14 +3764,14 @@ static void ConvertHeader(EXRHeader *exr_header, const HeaderInfo& info) {
   }
 
   exr_header->pixel_types = static_cast<int *>(
-      malloc(sizeof(int) * static_cast<size_t>(exr_header->num_channels)));
+      MEMORY_MALLOC(sizeof(int) * static_cast<size_t>(exr_header->num_channels)));
   for (size_t c = 0; c < static_cast<size_t>(exr_header->num_channels); c++) {
     exr_header->pixel_types[c] = info.channels[c].pixel_type;
   }
 
   // Initially fill with values of `pixel_types`
   exr_header->requested_pixel_types = static_cast<int *>(
-      malloc(sizeof(int) * static_cast<size_t>(exr_header->num_channels)));
+      MEMORY_MALLOC(sizeof(int) * static_cast<size_t>(exr_header->num_channels)));
   for (size_t c = 0; c < static_cast<size_t>(exr_header->num_channels); c++) {
     exr_header->requested_pixel_types[c] = info.channels[c].pixel_type;
   }
@@ -3785,7 +3785,7 @@ static void ConvertHeader(EXRHeader *exr_header, const HeaderInfo& info) {
       exr_header->num_custom_attributes = TINYEXR_MAX_CUSTOM_ATTRIBUTES;
     }
 
-    exr_header->custom_attributes = static_cast<EXRAttribute *>(malloc(
+    exr_header->custom_attributes = static_cast<EXRAttribute *>(MEMORY_MALLOC(
         sizeof(EXRAttribute) * size_t(exr_header->num_custom_attributes)));
 
     for (size_t i = 0; i < info.attributes.size(); i++) {
@@ -3866,7 +3866,7 @@ static int DecodeChunk(EXRImage *exr_image, const EXRHeader *exr_header,
     size_t num_tiles = offsets.size();  // = # of blocks
 
     exr_image->tiles = static_cast<EXRTile *>(
-        calloc(sizeof(EXRTile), static_cast<size_t>(num_tiles)));
+        MEMORY_CALLOC(sizeof(EXRTile), static_cast<size_t>(num_tiles)));
 
     for (size_t tile_idx = 0; tile_idx < num_tiles; tile_idx++) {
       // Allocate memory for each tile.
@@ -4215,11 +4215,11 @@ static int DecodeEXRImage(EXRImage *exr_image, const EXRHeader *exr_header,
       if ((exr_header->num_channels > 0) && exr_image && exr_image->images) {
         for (size_t c = 0; c < size_t(exr_header->num_channels); c++) {
           if (exr_image->images[c]) {
-            free(exr_image->images[c]);
+            MEMORY_FREE(exr_image->images[c]);
             exr_image->images[c] = NULL;
           }
         }
-        free(exr_image->images);
+        MEMORY_FREE(exr_image->images);
         exr_image->images = NULL;
       }
     }
@@ -4287,7 +4287,7 @@ int LoadEXRFromMemory(float **out_rgba, int *width, int *height,
     // Grayscale channel only.
 
     (*out_rgba) = reinterpret_cast<float *>(
-        malloc(4 * sizeof(float) * static_cast<size_t>(exr_image.width) *
+        MEMORY_MALLOC(4 * sizeof(float) * static_cast<size_t>(exr_image.width) *
             static_cast<size_t>(exr_image.height)));
 
     if (exr_header.tiled) {
@@ -4353,7 +4353,7 @@ int LoadEXRFromMemory(float **out_rgba, int *width, int *height,
     }
 
     (*out_rgba) = reinterpret_cast<float *>(
-        malloc(4 * sizeof(float) * static_cast<size_t>(exr_image.width) *
+        MEMORY_MALLOC(4 * sizeof(float) * static_cast<size_t>(exr_image.width) *
             static_cast<size_t>(exr_image.height)));
 
     if (exr_header.tiled) {
@@ -4490,9 +4490,9 @@ int ParseEXRMultipartHeaderFromMemory(
 
   // allocate memory for EXRHeader and create array of EXRHeader pointers.
   (*exr_headers) =
-      static_cast<TinyExr_EXRHeader **>(malloc(sizeof(TinyExr_EXRHeader *) * infos.size()));
+      static_cast<TinyExr_EXRHeader **>(MEMORY_MALLOC(sizeof(TinyExr_EXRHeader *) * infos.size()));
   for (size_t i = 0; i < infos.size(); i++) {
-    TinyExr_EXRHeader *exr_header = static_cast<TinyExr_EXRHeader *>(malloc(sizeof(TinyExr_EXRHeader)));
+    TinyExr_EXRHeader *exr_header = static_cast<TinyExr_EXRHeader *>(MEMORY_MALLOC(sizeof(TinyExr_EXRHeader)));
 
     ConvertHeader(exr_header, infos[i]);
 
@@ -4998,7 +4998,7 @@ size_t SaveEXRImageToMemory(const EXRImage *exr_image,
     return 0;
   }
 
-  (*memory_out) = static_cast<unsigned char *>(malloc(totalSize));
+  (*memory_out) = static_cast<unsigned char *>(MEMORY_MALLOC(totalSize));
   memcpy((*memory_out), &memory.at(0), memory.size());
   unsigned char *memory_ptr = *memory_out + memory.size();
 
