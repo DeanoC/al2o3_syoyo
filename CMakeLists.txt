@@ -52,4 +52,5 @@ set( TestDeps
 		utils_simple_logmanager
 		al2o3_catch2 )
 ADD_LIB_TESTS(${LibName} "${Interface}" "${Tests}" "${TestDeps}")
-
+ADD_EXTERNAL_TESTVECTORS(${LibName} exr https://github.com/openexr/openexr-images)
+ADD_EXTERNAL_TESTVECTORS(${LibName} obj https://github.com/syoyo/tinyobjloader.git)

@@ -12,7 +12,7 @@
 #include <iostream>
 #include <sstream>
 
-static const char *gBasePath = "test_data/models/";
+static const char *gBasePath = "test_data/al2o3_syoyo/obj/models/";
 #define SET_PATH()   char existCurDir[1024]; \
 	Os_GetCurrentDir(existCurDir, sizeof(existCurDir)); \
 	char path[2048]; \

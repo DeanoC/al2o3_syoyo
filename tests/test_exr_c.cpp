@@ -6,7 +6,7 @@
 #include "al2o3_syoyo/tiny_exr.h"
 
 // path to https://github.com/openexr/openexr-images
-static const char *gBasePath = "test_data/exr/";
+static const char *gBasePath = "test_data/al2o3_syoyo/exr/";
 
 #define SET_PATH()   char existCurDir[1024]; \
 	Os_GetCurrentDir(existCurDir, sizeof(existCurDir)); \
